@@ -3,61 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Library Auth System</title>
+  <title>Register - Library Login</title>
   <style>
-    body { font-family: Arial, sans-serif; background: linear-gradient(135deg,#667eea,#764ba2); height:100vh; margin:0; display:flex; align-items:center; justify-content:center; }
-    .container { background:white; padding:30px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); width:350px; text-align:center; }
-    input { width:100%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
-    button { width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
-    button:hover { background:#5a67d8; }
-    a { color:#667eea; text-decoration:none; font-weight:bold; }
-    a:hover { text-decoration:underline; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 360px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: red;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>📝 Create Account</h2>
+    <h2>Create Account</h2>
     <form id="registerForm">
       <input type="text" id="fullName" placeholder="Full Name" required>
       <input type="email" id="email" placeholder="Email" required>
       <input type="text" id="username" placeholder="Username" required>
       <input type="password" id="password" placeholder="Password" required>
       <button type="submit">Register</button>
+      <p class="message" id="message"></p>
     </form>
     <p>Already have an account? <a href="login.html">Login</a></p>
-    <p id="msg"></p>
   </div>
 
   <script>
-    const API_URL = '/api/auth/register';
     const form = document.getElementById('registerForm');
-    const msg = document.getElementById('msg');
+    const message = document.getElementById('message');
 
-    form.addEventListener('submit', async e => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.textContent = '';
+      message.textContent = '';
 
-      const fullName = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+      const data = {
+        fullName: document.getElementById('fullName').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value
+      };
 
       try {
-        const res = await fetch(API_URL, {
+        const res = await fetch('/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fullName, email, username, password })
+          body: JSON.stringify(data)
         });
-        const data = await res.json();
 
-        if (!res.ok) throw new Error(data.error || 'Registration failed');
-
-        msg.style.color = 'green';
-        msg.textContent = '✅ Registered successfully! Redirecting to login...';
-        setTimeout(() => window.location.href = 'login.html', 1500);
-      } catch (err) {
-        msg.style.color = 'red';
-        msg.textContent = err.message;
+        const result = await res.json();
+        if (res.ok) {
+          message.style.color = 'green';
+          message.textContent = 'Registered successfully! Redirecting...';
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          message.style.color = 'red';
+          message.textContent = result.error || 'Registration failed';
+        }
+      } catch (error) {
+        message.style.color = 'red';
+        message.textContent = 'Server error, please try again later';
       }
     });
   </script>
